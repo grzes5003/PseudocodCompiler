@@ -7,11 +7,15 @@
 #include <set>
 #define PROG_DATA 1
 #define PROG_CODE 2
+#define DEBBUG_MODE 1
 
 class Program
 {
+	int line_number;
+
+
 	std::set<char> forbChar = {
-		'.', ',', '-', '>', '<', '(', ')'
+		'.', ',', '-', '>', '<', '(', ')', '='
 	};
 	enum CR_TYPE {
 		nazwa = 0,
@@ -20,10 +24,14 @@ class Program
 		gotoInstruction = 4,
 		endInstruction = 5,
 		ifStatment = 6,
+		
 		equal = 10,
 		lesst = 11,
 		greatert = 12,
 		notequal = 13,
+		greaterOrEq = 14,
+		lessOrEq = 15,
+		
 		nothing = 100,
 	};
 
@@ -35,20 +43,24 @@ class Program
 	
 	bool isCorrect( std::string &s, CR_TYPE cr );
 	CR_TYPE whatIsThat( std::string &s );
+	bool IFStatment( std::string &s );
 
 	std::fstream _file;
-	std::vector<std::pair<std::string, float>> _variables;
+
+	void read(std::fstream &file);
+	void error(int number);
 
 	void saveVar( std::vector<std::pair<std::string, float>>& vec, std::string varName, float varValue );
-	void read(std::fstream &file);
-	void readCode( std::string &line );
-	void error(int number);
+	float valueOfVar( std::string _name, std::vector<std::pair<std::string, float>>& base );
+	void changeVar( std::vector<std::pair<std::string, float>>& vec, std::string varName, float varNewValue );
 public:
 	Program(std::string file_name);
 	Program() {};
 	
 	virtual ~Program();
 	
+	void readCode( std::string &line );
+	std::vector<std::pair<std::string, float>> _variables;
 	
 	
 	std::string oneWord( std::string &s ); //zwraca pierwsze slowo w ciagu
