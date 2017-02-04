@@ -19,16 +19,39 @@ bool Program::isSpacesOnly( std::string & s ) {
 }
 
 bool Program::isCorrect( std::string & s, CR_TYPE cr ) {
-	if( cr == nazwa) {
+	if( cr == nazwa ) {
 		for( unsigned int i = 0; i < s.size(); i++ ) {
-			if( )
+			if( forbChar.find( s.at( i ) ) != forbChar.end() )
+				error( 1 ); //usage of forbitten characters
 		}
 	}
 	else if( cr == value ) {
-
+		for( unsigned int i = 0; i < s.size(); i++ ) {
+			if( !isdigit( s.at( i ) ) ) {
+				error( 1 ); //usage of nondigit characters
+			}
+		}
 	}
-	return false;
+	return true;
 }
+
+Program::CR_TYPE Program::whatIsThat( std::string & s ) {
+	if( s == "if" ) return ifStatment;
+	else if( s == "goto" ) return gotoInstruction;
+	else if( s == "end" ) return endInstruction;
+	else if( s == "<-" ) return arrow;
+	for( unsigned int i = 0; i < _variables.size(); i++ ) {
+		if( s == _variables.at( i ).first ) {
+			return nazwa;
+		}
+	}
+	for( unsigned int i = 0; i < s.size(); i++ ) {
+		if( !isdigit( s.at( i ) ) )
+			return nothing;
+	}
+	return value;
+}
+
 
 std::string Program::oneWord( std::string & s ) {
 	deleteSpaces( s );
@@ -44,7 +67,7 @@ std::string Program::oneWord( std::string & s ) {
 	return result;
 }
 
-void Program::saveVar( std::vector<std::pair<std::string,float>>& vec, std::string varName ) {
+void Program::saveVar( std::vector<std::pair<std::string,float>>& vec, std::string varName, float varValue ) {
 
 }
 
@@ -79,16 +102,46 @@ void Program::read( std::fstream & file ) {
 		else if( PROG_PART == PROG_DATA ) {
 			//wez linijke i wyciagnij z niej dane
 			std::string varname;
-			float value;
+			float value = 0;
+			std::string svalue;
 
 			if( !isSpacesOnly(line) ) {
-
+				varname = oneWord( line );
+				if( !isSpacesOnly( line ) ) {
+					svalue = oneWord( line );
+					//moze byc problem
+					std::string::size_type sz;
+					value = std::stof( svalue, &sz );
+				}
+				//save variable in vector
+				saveVar( _variables, varname, value );
 			}
+
 		}
 		else if( PROG_PART == PROG_CODE ) {
-
+			readCode( line );
 		}
 		line_number++;
+	}
+}
+
+void Program::readCode( std::string & line ) {
+	enum Part {
+		left,
+		right
+	};
+	
+	std::string recentWord;
+	Part part = left;
+	recentWord = oneWord(line);
+
+	switch( whatIsThat(recentWord) ) {
+	case ifStatment:
+		
+		break;
+	if( part == left ) {
+
+	}
 	}
 }
 

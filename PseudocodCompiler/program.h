@@ -16,7 +16,17 @@ class Program
 	enum CR_TYPE {
 		nazwa = 0,
 		value = 1,
+		arrow = 3,
+		gotoInstruction = 4,
+		endInstruction = 5,
+		ifStatment = 6,
+		equal = 10,
+		lesst = 11,
+		greatert = 12,
+		notequal = 13,
+		nothing = 100,
 	};
+
 
 	int PROG_PART = 0;
 
@@ -24,12 +34,14 @@ class Program
 	bool isSpacesOnly( std::string &s );
 	
 	bool isCorrect( std::string &s, CR_TYPE cr );
+	CR_TYPE whatIsThat( std::string &s );
 
 	std::fstream _file;
-	std::vector<float> _variables;
+	std::vector<std::pair<std::string, float>> _variables;
 
-	void saveVar( std::vector<std::pair<std::string, float>>& vec, std::string varName );
+	void saveVar( std::vector<std::pair<std::string, float>>& vec, std::string varName, float varValue );
 	void read(std::fstream &file);
+	void readCode( std::string &line );
 	void error(int number);
 public:
 	Program(std::string file_name);
