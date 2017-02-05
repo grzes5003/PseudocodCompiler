@@ -43,7 +43,6 @@ class Program
 	
 	bool isCorrect( std::string &s, CR_TYPE cr );
 	CR_TYPE whatIsThat( std::string &s );
-	bool IFStatment( std::string &s );
 
 	std::fstream _file;
 
@@ -59,6 +58,7 @@ public:
 	
 	virtual ~Program();
 	
+	bool IFStatment( std::string &s );
 	void readCode( std::string &line );
 	std::vector<std::pair<std::string, float>> _variables;
 	

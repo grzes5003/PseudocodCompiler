@@ -64,6 +64,7 @@ Program::CR_TYPE Program::whatIsThat( std::string & s ) {
 }
 
 bool Program::IFStatment( std::string & s ) {
+	std::string prefixDEBBUG = "IFStatment(): ";
 	std::string nawias, reszta;
 	bool upload = false, resztaUp = false;
 	for( unsigned int i = 0; i < s.size(); i++ ) {
@@ -119,10 +120,14 @@ bool Program::IFStatment( std::string & s ) {
 
 	//debugg
 	if( DEBBUG_MODE ) {
-		std::cout << "co to:" << leftPart << ": druga to:" << rightPart << ":" << std::endl;
-		std::cout << "co to:" << whatIsThat( leftPart ) << ": druga to:" << whatIsThat( rightPart ) << std::endl;
-		std::cout << "pierwsza wartosc to:" << leftValue << ": druga to:" << rightValue << std::endl;
+		std::cout << prefixDEBBUG <<"co to:" << leftPart << ": druga to:" << rightPart << ":" << std::endl;
+		std::cout << prefixDEBBUG << "co to:" << whatIsThat( leftPart ) << ": druga to:" << whatIsThat( rightPart ) << std::endl;
+		std::cout << prefixDEBBUG << "pierwsza wartosc to:" << leftValue << ": druga to:" << rightValue << std::endl;
+		std::cout << prefixDEBBUG << "reszta :" << reszta << ": " << std::endl;
 	}
+	
+	s = reszta;
+	
 	//ogarniamy statment w if'e
 	switch( whatIsThat( midPart ) ) {
 	case equal:
@@ -147,19 +152,62 @@ bool Program::IFStatment( std::string & s ) {
 		error( 1 ); //bad midd part of if statment
 	}
 
-	s = reszta;
 	return false;
 }
 
 
 std::string Program::oneWord( std::string & s ) {
 	deleteSpaces( s );
-	std::string result;
+	std::string result = "";
 	int i = 0;
-	while( i < s.size() && s.at( i ) != ' ' && s.at(i) != '(' ) { //mam nadzieje ze dzialac bd, po dodaniu '('
+	
+	if( s.size() == 0 ) {
+		return result;
+	}
+	
+	if( i == 0
+		&&( 
+		s.at( i ) == ' '
+		|| s.at( i ) == '+'
+		|| s.at( i ) == '-'
+		|| s.at( i ) == '<'
+		|| s.at( i ) == '>'
+		|| s.at( i ) == '='
+		|| s.at( i ) == '*'
+		|| s.at( i ) == '/'
+			) ) {
 		result += s.at( i );
 		i++;
 	}
+
+	if( result != "*"
+		&& result != "-"
+		&& result != "+"
+		&& result != "/"
+		)
+	while( i < s.size() 
+		&& s.at( i ) != ' '
+		&& s.at( i ) != '+'
+		&& s.at( i ) != '-' 
+		&& s.at( i ) != '<' 
+		&& s.at( i ) != '>' 
+		&& s.at( i ) != '='
+		&& s.at( i ) != '*'
+		&& s.at( i ) != '/'
+		) {
+		result += s.at( i );
+		i++;
+	}
+
+	if(i>0 )
+	if( s.at( i-1) == '='
+		|| s.at( i-1 ) == '<'
+		|| s.at( i-1 ) == '>' ) {
+		result += s.at( i );
+		i++;
+		//result += s.at( i );
+	}
+
 	if( i == s.size() )
 		i--;
 	s.erase(s.begin(),s.begin()+i);
@@ -223,6 +271,7 @@ void Program::read( std::fstream & file ) {
 
 		}
 		else if( PROG_PART == PROG_CODE ) {
+			line += " "; //dodalem spacje na koniec by nie bylo problemow ze zostajacymi znakami
 			readCode( line );
 		}
 		line_number++;
@@ -230,6 +279,10 @@ void Program::read( std::fstream & file ) {
 }
 
 void Program::readCode( std::string & line ) {
+	std::string prefixDEBBUG = "readCode(): ";
+	if( DEBBUG_MODE ) {
+		std::cout << prefixDEBBUG << "input variable line= \"" << line << "\""<< std::endl;
+	}
 	//enum Part {
 	//	left,
 	//	right
@@ -240,23 +293,34 @@ void Program::readCode( std::string & line ) {
 
 	std::string varName;
 
-	recentWord = oneWord(line);
+	//recentWord = oneWord(line);
 
-	if( DEBBUG_MODE ) {
-		std::cout << "recent word1 = " << recentWord << std::endl;
-	}
+	deleteSpaces( line );
 
-	if( whatIsThat( recentWord ) == ifStatment ) {
+	if( whatIsThat( line ) == ifStatment ) {
+		if( DEBBUG_MODE ) {
+			std::cout << prefixDEBBUG << " IF STATMENT " << std::endl;
+			std::cout << prefixDEBBUG << "line now is = " << line << std::endl;
+			std::cout << prefixDEBBUG << "word now is = " << recentWord << std::endl;
+		}
+
 		if( !IFStatment( line ) ) {
 			if( DEBBUG_MODE ) {
-				std::cout << "false value of if statment " << std::endl;
+				std::cout << prefixDEBBUG << "false value of if statment " << std::endl;
 			}
 			return;
 		}
-		recentWord = oneWord( line );
+
+
 		if( DEBBUG_MODE ) {
-			std::cout << "analize an after if statment" << std::endl;
+			std::cout << prefixDEBBUG << "analize after if statment" << std::endl;
+			std::cout << prefixDEBBUG << "recent line now is = " << line << std::endl;
+			std::cout << prefixDEBBUG << "recent word now is = " << recentWord << std::endl;
 		}
+	}
+	recentWord = oneWord( line );
+	if( DEBBUG_MODE ) {
+		std::cout << prefixDEBBUG << "recent word1 = " << recentWord << std::endl;
 	}
 
 	int number;
@@ -265,17 +329,18 @@ void Program::readCode( std::string & line ) {
 	switch( whatIsThat(recentWord) ) {
 		case nazwa:
 			if( DEBBUG_MODE ) {
-				std::cout << "left part is variable :" <<recentWord << ": "<< std::endl;
+				std::cout << prefixDEBBUG << "left part is variable :" <<recentWord << ": "<< std::endl;
 
 			}
 			varName = recentWord;
 			break;
 		case gotoInstruction:
 			//goto linijka
+			number = std::stoi( oneWord( line ) ); //moze byc zle //ale jest dobrze
+			line_number = number;
 			if( DEBBUG_MODE ) {
-				std::cout << "goto instruction" << std::endl;
+				std::cout << prefixDEBBUG << "goto instruction, line number:" << number<< ":"<<std::endl;
 			}
-			number = std::stoi( oneWord( line ) ); //moze byc zle
 			return;
 		default:
 			error( 1 ); //syntax error
@@ -284,17 +349,24 @@ void Program::readCode( std::string & line ) {
 	recentWord = oneWord( line );
 
 	if( DEBBUG_MODE ) {
-		std::cout << "recent word2 = " << recentWord << std::endl;
+		std::cout << prefixDEBBUG << "mid word = " << recentWord << std::endl;
 	}
 
 	if( !isCorrect( recentWord, arrow ) ) {
 		error( 1 ); //no arrow in line, syntax error
 	}
 
+	///--------------
+	///prawa strona
+	///--------------
+	
 	recentWord = oneWord( line );
 
+	if( recentWord.size() == 0 ) error( 1 ); //no expression on the right side
+
 	if( DEBBUG_MODE ) {
-		std::cout << "recent word3 = " << recentWord << std::endl;
+		std::cout << prefixDEBBUG << "recent word2 = " << recentWord << std::endl;
+		std::cout << prefixDEBBUG << "left = :" << line << ": "<< std::endl;
 	}
 
 	float value1,value2,result;
@@ -316,8 +388,24 @@ void Program::readCode( std::string & line ) {
 	}
 
 	recentWord = oneWord( line );
+	if( DEBBUG_MODE ) {
+		std::cout << prefixDEBBUG << "recent word3 (operator) = " << recentWord << std::endl;
+		std::cout << prefixDEBBUG << "left = :" << line << ": " << std::endl;
+	}
+
+	if( recentWord.size() == 0 ) {
+		changeVar( _variables, varName, value1 );
+		return;
+	}
+
 
 	std::string nextWord = oneWord( line );
+	if( DEBBUG_MODE ) {
+		std::cout << prefixDEBBUG << "recent word4 = " << nextWord << std::endl;
+		std::cout << prefixDEBBUG << "left = :" << line << ": " << std::endl;
+	}
+	if( nextWord.size() == 0 ) error( 0 ); //no expression on the right side (<- x * 'missing')
+
 	if( whatIsThat( nextWord ) == value ) {
 		std::string::size_type sz;
 		value2 = std::stof( nextWord, &sz );
@@ -328,15 +416,27 @@ void Program::readCode( std::string & line ) {
 
 	if( recentWord == "+" ) {
 		result = value1 + value2;
+		if( DEBBUG_MODE ) {
+			std::cout << prefixDEBBUG << "sum, result = " << result << std::endl;
+		}
 	}
 	else if( recentWord == "-" ) {
 		result = value1 - value2;
+		if( DEBBUG_MODE ) {
+			std::cout << prefixDEBBUG << "sub, result = " << result << std::endl;
+		}
 	}
 	else if( recentWord == "/" ) {
 		result = (int)(value1 / value2);
+		if( DEBBUG_MODE ) {
+			std::cout << prefixDEBBUG << "div, result = " << result << std::endl;
+		}
 	}
 	else if( recentWord == "*" ) {
 		result = value1 * value2;
+		if( DEBBUG_MODE ) {
+			std::cout << prefixDEBBUG << "mult, result = " << result << std::endl;
+		}
 	}
 	else {
 		error( 1 ); //syntax error
@@ -367,6 +467,9 @@ void Program::changeVar( std::vector<std::pair<std::string, float>>& vec, std::s
 
 	while( number < vec.size() && vec.at(number).first != varName ) {
 		number++;
+	}
+	if( DEBBUG_MODE ) {
+		std::cout << "changeVar(): variable name :"<<varName<<": in array :" << number<< ": change var to value :"<< varNewValue << ":"<<std::endl;
 	}
 	//mam nazdieje ze nie jest to kolejny numer
 	vec.at( number ).second = varNewValue;
