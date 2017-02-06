@@ -224,7 +224,8 @@ void Program::saveVar( std::vector<std::pair<std::string,float>>& vec, std::stri
 }
 
 void Program::read( std::fstream & file ) {
-	
+	std::string prefixDEBBUG = "read():";
+
 	std::string line;
 	line_number = 1;
 
@@ -232,6 +233,9 @@ void Program::read( std::fstream & file ) {
 		deleteSpaces( line );
 		if( line.at( 0 ) == '#' ) {
 		///sprawdzenie ktory to fragment kodu
+			if( DEBBUG_MODE ) {
+				std::cout << prefixDEBBUG << "word started with # :" << line << ":" << std::endl;
+			}
 			if(line == "#DATA" && PROG_PART == 0) {
 				PROG_PART = PROG_DATA;
 				//ok
@@ -249,6 +253,9 @@ void Program::read( std::fstream & file ) {
 			else if( line == "#CODE" && PROG_PART == PROG_CODE ) {
 				error( 1 );
 			}
+			else if( line == "#END" ) {
+				summarise();
+			}
 		///koniec sprawdznia
 		}
 		else if( PROG_PART == PROG_DATA ) {
@@ -258,13 +265,29 @@ void Program::read( std::fstream & file ) {
 			std::string svalue;
 
 			if( !isSpacesOnly(line) ) {
+
+				line += " "; //naprawa oneWord;
 				varname = oneWord( line );
+
+				if( DEBBUG_MODE ) {
+					std::cout << prefixDEBBUG << "new var, called :" << varname << ":" << std::endl;
+				}
+				
 				if( !isSpacesOnly( line ) ) {
 					svalue = oneWord( line );
+					
+					if( DEBBUG_MODE ) {
+						std::cout << prefixDEBBUG << "value of var (in string) :" << svalue << ":" << std::endl;
+					}
+					
 					//moze byc problem
 					std::string::size_type sz;
 					value = std::stof( svalue, &sz );
 				}
+				else
+					if( DEBBUG_MODE ) {
+						std::cout << prefixDEBBUG << "var, with default var :" << 0.f << ":" << std::endl;
+					}
 				//save variable in vector
 				saveVar( _variables, varname, value );
 			}
@@ -451,6 +474,10 @@ void Program::error( int number ) {
 	std::cout << "error lol" << std::endl;
 }
 
+void Program::summarise() {
+	exit( 0 );
+}
+
 float Program::valueOfVar( std::string _name, std::vector<std::pair<std::string, float>>& base ) {
 	for( unsigned int i = 0; i < base.size(); i++ ) {
 		if( _name == base.at( i ).first ) {
@@ -482,6 +509,7 @@ Program::Program( std::string file_name ) {
 		system( "pause" );
 		exit(1);
 	}
+	read(_file);
 }
 
 Program::~Program() {

@@ -1,0 +1,12 @@
+i<-2
+till<-x/2
+
+div<-x/i
+mult<-i*div
+re<-x-mult
+
+if(re!=0) goto
+sum1<-sum1+i
+
+i<-i+1
+if(till>=i) goto 4

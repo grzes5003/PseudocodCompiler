@@ -48,6 +48,7 @@ class Program
 
 	void read(std::fstream &file);
 	void error(int number);
+	void summarise();
 
 	void saveVar( std::vector<std::pair<std::string, float>>& vec, std::string varName, float varValue );
 	float valueOfVar( std::string _name, std::vector<std::pair<std::string, float>>& base );

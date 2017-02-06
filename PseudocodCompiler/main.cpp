@@ -12,7 +12,7 @@ int main() {
 
 	std::string b = "if(alfa<=5)  beta <- betaaa1* a  ";
 	std::string s = " goto 15  ";
-	Program p("code.txt");
+	Program p("E:/Projekty/Kodowe/STUDIA_1_ROK/DODATKOWE/NAUKA_CPP/PseudocodCompiler/Debug/code.txt");
 	
 	p._variables = _variables;
 	//p.readCode( s );
