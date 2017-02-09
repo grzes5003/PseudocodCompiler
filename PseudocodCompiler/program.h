@@ -5,9 +5,11 @@
 #include <vector>
 #include <algorithm>
 #include <set>
+#include <map>
+
 #define PROG_DATA 1
 #define PROG_CODE 2
-#define DEBBUG_MODE 1
+#define DEBBUG_MODE 0
 
 class Program
 {
@@ -43,6 +45,7 @@ class Program
 	
 	bool isCorrect( std::string &s, CR_TYPE cr );
 	CR_TYPE whatIsThat( std::string &s );
+	std::fstream& GotoLine( std::fstream& file, unsigned int num );
 
 	std::fstream _file;
 

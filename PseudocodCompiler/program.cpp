@@ -9,6 +9,7 @@ void Program::deleteSpaces( std::string & s ) {
 	}
 	s.erase( s.begin(), s.begin()+it );
 }
+//no err statments
 
 bool Program::isSpacesOnly( std::string & s ) {
 	for( unsigned int i = 0; i < s.size(); i++ ) {
@@ -17,18 +18,19 @@ bool Program::isSpacesOnly( std::string & s ) {
 	}
 	return true;
 }
+//no err
 
 bool Program::isCorrect( std::string & s, CR_TYPE cr ) {
 	if( cr == nazwa ) {
 		for( unsigned int i = 0; i < s.size(); i++ ) {
 			if( forbChar.find( s.at( i ) ) != forbChar.end() )
-				error( 1 ); //usage of forbitten characters
+				error( 100 ); //usage of forbitten characters CODE 100
 		}
 	}
 	else if( cr == value ) {
 		for( unsigned int i = 0; i < s.size(); i++ ) {
 			if( !isdigit( s.at( i ) ) ) {
-				error( 1 ); //usage of nondigit characters
+				error( 101 ); //usage of nondigit characters CODE 101
 			}
 		}
 	}
@@ -39,6 +41,7 @@ bool Program::isCorrect( std::string & s, CR_TYPE cr ) {
 	}
 	return true;
 }
+//two err stat
 
 Program::CR_TYPE Program::whatIsThat( std::string & s ) {
 	if( s.at(0) == 'i' && s.at(1) == 'f' ) return ifStatment;
@@ -103,7 +106,7 @@ bool Program::IFStatment( std::string & s ) {
 		leftValue = std::stof( leftPart, &sz );
 	}
 	else {
-		error( 1 ); //bad left part of statment, neither name or value
+		error( 200 ); //bad left part of statment, neither name or value
 	}
 
 	//ogarniamy prawa czesc if'a
@@ -115,7 +118,7 @@ bool Program::IFStatment( std::string & s ) {
 		rightValue = std::stof( rightPart, &sz );
 	}
 	else {
-		error( 1 ); //bad right part of statment, neither name or value
+		error( 201 ); //bad right part of statment, neither name or value
 	}
 
 	//debugg
@@ -149,12 +152,12 @@ bool Program::IFStatment( std::string & s ) {
 		return (leftValue <= rightValue);
 		break;
 	default:
-		error( 1 ); //bad midd part of if statment
+		error( 202 ); //bad midd part of if statment
 	}
 
 	return false;
 }
-
+//3 err
 
 std::string Program::oneWord( std::string & s ) {
 	deleteSpaces( s );
@@ -213,15 +216,18 @@ std::string Program::oneWord( std::string & s ) {
 	s.erase(s.begin(),s.begin()+i);
 	return result;
 }
+//no err
 
 void Program::saveVar( std::vector<std::pair<std::string,float>>& vec, std::string varName, float varValue ) {
 	for( unsigned int i = 0; i < vec.size(); i++ ) {
 		if( varName == vec.at( i ).first ) {
-			error( 1 ); //variable of this name already exists
+			error( 50 ); //variable of this name already exists
+			return;
 		}
 	}
 	vec.push_back( std::pair<std::string, float>( varName, varValue ) );
 }
+//one err
 
 void Program::read( std::fstream & file ) {
 	std::string prefixDEBBUG = "read():";
@@ -241,17 +247,17 @@ void Program::read( std::fstream & file ) {
 				//ok
 			}
 			else if( line == "#DATA" && PROG_PART == PROG_DATA ) {
-				error( 1 );
+				error( 10 );
 			}
 			else if( line == "#DATA" && PROG_PART == PROG_CODE ) {
-				error( 1 );
+				error( 11 );
 			}
 			else if( line == "#CODE" && PROG_PART == PROG_DATA ) {
 				PROG_PART = PROG_CODE;
 				//ok
 			}
 			else if( line == "#CODE" && PROG_PART == PROG_CODE ) {
-				error( 1 );
+				error( 12 );
 			}
 			else if( line == "#END" ) {
 				summarise();
@@ -259,6 +265,12 @@ void Program::read( std::fstream & file ) {
 		///koniec sprawdznia
 		}
 		else if( PROG_PART == PROG_DATA ) {
+
+			
+			if( DEBBUG_MODE ) {
+				std::cout << prefixDEBBUG << "line number :" << line_number << ":" << std::endl;
+			}
+
 			//wez linijke i wyciagnij z niej dane
 			std::string varname;
 			float value = 0;
@@ -300,6 +312,7 @@ void Program::read( std::fstream & file ) {
 		line_number++;
 	}
 }
+//3 types of err
 
 void Program::readCode( std::string & line ) {
 	std::string prefixDEBBUG = "readCode(): ";
@@ -364,9 +377,10 @@ void Program::readCode( std::string & line ) {
 			if( DEBBUG_MODE ) {
 				std::cout << prefixDEBBUG << "goto instruction, line number:" << number<< ":"<<std::endl;
 			}
+			GotoLine( _file, line_number );
 			return;
 		default:
-			error( 1 ); //syntax error
+			error( 20 ); //syntax error
 	}
 	
 	recentWord = oneWord( line );
@@ -376,7 +390,7 @@ void Program::readCode( std::string & line ) {
 	}
 
 	if( !isCorrect( recentWord, arrow ) ) {
-		error( 1 ); //no arrow in line, syntax error
+		error( 21 ); //no arrow in line, syntax error
 	}
 
 	///--------------
@@ -385,7 +399,7 @@ void Program::readCode( std::string & line ) {
 	
 	recentWord = oneWord( line );
 
-	if( recentWord.size() == 0 ) error( 1 ); //no expression on the right side
+	if( recentWord.size() == 0 ) error( 25 ); //no expression on the right side
 
 	if( DEBBUG_MODE ) {
 		std::cout << prefixDEBBUG << "recent word2 = " << recentWord << std::endl;
@@ -407,7 +421,7 @@ void Program::readCode( std::string & line ) {
 			value1 = std::stof(recentWord, &sz);
 			break;
 		default:
-			error( 1 ); //syntax error
+			error( 20 ); //syntax error
 	}
 
 	recentWord = oneWord( line );
@@ -427,7 +441,7 @@ void Program::readCode( std::string & line ) {
 		std::cout << prefixDEBBUG << "recent word4 = " << nextWord << std::endl;
 		std::cout << prefixDEBBUG << "left = :" << line << ": " << std::endl;
 	}
-	if( nextWord.size() == 0 ) error( 0 ); //no expression on the right side (<- x * 'missing')
+	if( nextWord.size() == 0 ) error( 25 ); //no expression on the right side (<- x * 'missing')
 
 	if( whatIsThat( nextWord ) == value ) {
 		std::string::size_type sz;
@@ -462,21 +476,54 @@ void Program::readCode( std::string & line ) {
 		}
 	}
 	else {
-		error( 1 ); //syntax error
+		error( 20 ); //syntax error
 	}
 
 
 	//zapisz pod lewa strona; (pod varName)
 	changeVar( _variables, varName, result );
 }
+//3 types of err
 
 void Program::error( int number ) {
-	std::cout << "error lol" << std::endl;
+	std::map<int, std::string> error_map{
+		{ 1, "unrecognized error." },
+		{ 100, "syntax error: forbitten characters in variable name." },
+		{ 101, "syntax error: value contains nondigit characters." },
+		//if stat
+		{ 200, "syntax error: unrecognized left part of line: nor of value or var name. " },
+		{ 201, "syntax error: unrecognized right part of line: nor of value or var name." },
+		{ 202, "syntax error: unrecognized middle part of a statment." },
+		//saveVar
+		{ 50, "variable already exists." },
+		//read
+		{ 10, "syntax error: DATA segment already called." },
+		{ 11, "syntax error: DATA segment suposed to be before code." },
+		{ 12, "syntax error: CODE segment already called." },
+		//readCode
+		{ 20, "syntax error." },
+		{ 21, "syntax error: no arrow in line." },
+		
+		{ 25, "syntax error: no exression on the right side." },
+		//valueOfVar
+		{ 30, "cannot recognize the variable." },
+
+	};
+
+	std::cout << "error " << number << ", line: " << line_number <<": " << error_map.find(number)->second << std::endl;
+	system( "pause" );
+	exit( 0 );
 }
 
 void Program::summarise() {
+	std::cout << "VARIABLES SUMMARISE: \n";
+	for( unsigned int i = 0; i < _variables.size(); i++ ) {
+		std::cout << "variable named :" << _variables.at( i ).first << ":, final value :" << _variables.at( i ).second << ": " << std::endl;
+	}
+	system( "pause" );
 	exit( 0 );
 }
+//no err
 
 float Program::valueOfVar( std::string _name, std::vector<std::pair<std::string, float>>& base ) {
 	for( unsigned int i = 0; i < base.size(); i++ ) {
@@ -484,9 +531,10 @@ float Program::valueOfVar( std::string _name, std::vector<std::pair<std::string,
 			return base.at( i ).second;
 		}
 	}
-	error( 1 ); //cannot find variable whit this name
+	error( 30 ); //cannot find variable whit this name
 	return 0.0f;
 }
+//1 err
 
 void Program::changeVar( std::vector<std::pair<std::string, float>>& vec, std::string varName, float varNewValue ) {
 	valueOfVar( varName, vec );
@@ -502,6 +550,15 @@ void Program::changeVar( std::vector<std::pair<std::string, float>>& vec, std::s
 	vec.at( number ).second = varNewValue;
 }
 
+
+std::fstream& Program::GotoLine( std::fstream& file, unsigned int num ) {
+	file.seekg( std::ios::beg );
+	for( int i = 0; i < num - 1; ++i ) {
+		file.ignore( std::numeric_limits<std::streamsize>::max(), '\n' );
+	}
+	return file;
+}
+
 Program::Program( std::string file_name ) {
 	_file.open( file_name, std::ios::in );
 	if( !_file.good() ) {
@@ -514,3 +571,4 @@ Program::Program( std::string file_name ) {
 
 Program::~Program() {
 }
+
