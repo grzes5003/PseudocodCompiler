@@ -13,7 +13,8 @@ Instrukcja
   w każdym wierszu jedna deklaracja. Zmienne bez zadeklarowanej wartości przyjmują domyślnie wartość 0
   
   w sekcji CODE znajduję sie docelowy algorytm. W każdym wierszu jedne instrukcja.
-  
+ 
+  IMPORTANTO!
   Instrukcja "goto x":
   w pliku tekstowym wiersze są liczone od pierwszej lini kodu do ostatniej, a nie od segmentu CODE!
   
